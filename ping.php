@@ -58,19 +58,34 @@ function parse(string $line): ?Result {
     return new Failure($line, $time);
 }
 
+function ping(string $host = 'chatwork.com') {
+    $command = "/sbin/ping {$host} --apple-time";
 
-$command = "/sbin/ping chatwork.com --apple-time";
+    $handle = popen($command, 'r');
 
-$handle = popen($command, 'r');
-
-if (!$handle) {
-    die("failed to start $command");
-} else try {
-    while (!feof($handle)) {
-        $line = fgets($handle);
-        echo ">>> $line";
-        var_dump(parse($line));
+    if (!$handle) {
+        die("failed to start $command");
+    } else try {
+        while (!feof($handle)) {
+            $line = fgets($handle);
+            echo ">>> $line";
+            var_dump(parse($line));
+        }
+    } finally {
+        pclose($handle);
     }
-} finally {
-    pclose($handle);
 }
+
+if ($_POST) {
+    ping();
+}
+
+?>
+<html>
+<head>
+    <title>pingraph</title>
+</head>
+<body>
+    <h1>pingraph</h1>
+</body>
+</html>

@@ -83,9 +83,32 @@ if ($_POST) {
 ?>
 <html>
 <head>
-    <title>pingraph</title>
+<title>pingraph</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 </head>
 <body>
-    <h1>pingraph</h1>
+<h1>pingraph</h1>
+<canvas id="graph"></canvas>
+<script type="text/javascript">
+var ctx = document.getElementById('graph').getContext('2d');
+var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'line',
+
+    // The data for our dataset
+    data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [0, 10, 5, 2, 20, 30, 45]
+        }]
+    },
+
+    // Configuration options go here
+    options: {}
+});
+</script>
 </body>
 </html>

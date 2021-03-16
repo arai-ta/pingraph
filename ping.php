@@ -1,7 +1,7 @@
 <?php
 
 interface Result {
-    public function getContent(): string;
+    public function toEvent(): string;
 }
 
 class Success implements Result {
@@ -10,8 +10,12 @@ class Success implements Result {
         $this->sequence_no = $sequence_no;
         $this->logged_at   = $logged_at;
     }
-    public function getContent(): string {
-        return "#{$this->sequence_no} Success in {$this->consumed_ms} ms";
+    public function toEvent(): string {
+        return json_encode([
+            'time'      => $this->logged_at,
+            'rtt'       => $this->consumed_ms,
+            'comment'   => "Success #{$this->sequence_no}",
+        ]);
     }
 }
 
@@ -20,8 +24,12 @@ class Timeout implements Result {
         $this->sequence_no = $sequence_no;
         $this->logged_at   = $logged_at;
     }
-    public function getContent(): string {
-        return "#{$this->sequence_no} Timed out.";
+    public function toEvent(): string {
+        return json_encode([
+            'time'      => $this->logged_at,
+            'rtt'       => 0,
+            'comment'   => "Timed out #{$this->sequence_no}",
+        ]);
     }
 }
 
@@ -30,8 +38,12 @@ class Failure implements Result {
         $this->reason    = $reason;
         $this->logged_at = $logged_at;
     }
-    public function getContent(): string {
-        return "Failed: {$this->reason}";
+    public function toEvent(): string {
+        return json_encode([
+            'time'      => $this->logged_at,
+            'rtt'       => 0,
+            'comment'   => "Failure: {$this->reason}",
+        ]);
     }
 }
 
@@ -59,24 +71,34 @@ function parse(string $line): ?Result {
 }
 
 function ping(string $host = 'chatwork.com') {
-    $command = "/sbin/ping {$host} --apple-time";
+    $command = "/sbin/ping {$host} --apple-time 2>&1";
 
     $handle = popen($command, 'r');
 
     if (!$handle) {
         die("failed to start $command");
     } else try {
+        # Server-Sent Events
+        header("Content-Type: text/event-stream\n\n");
+
         while (!feof($handle)) {
             $line = fgets($handle);
-            echo ">>> $line";
-            var_dump(parse($line));
+            #echo ">>> $line";
+            $result = parse($line);
+            if (is_null($result)) {
+                continue;
+            }
+            echo "data: {$result->toEvent()}";
+            echo "\n\n";
+            flush();
         }
     } finally {
         pclose($handle);
+        exit;
     }
 }
 
-if ($_POST) {
+if (filter_input(INPUT_GET, 'sse') == 1) {
     ping();
 }
 
@@ -141,6 +163,17 @@ document.getElementById('button').onclick = function() {
     window.config.data.datasets[0].data.push(i+=10);
     window.chart.update();
 };
+
+var pinger = new EventSource('ping.php?sse=1');
+
+pinger.onmessage = function(e) {
+    console.log(e.data);
+}
+
+pinger.onerror = function(e) {
+    alert("error!");
+    console.error(e);
+}
 
 </script>
 </body>

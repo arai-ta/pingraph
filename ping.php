@@ -2,20 +2,9 @@
 
 interface Result {
     public function getContent(): string;
-    public function getLoggedTime(): int;
 }
 
-abstract class AbstractResult implements Result {
-    protected $logged_at;
-
-    abstract public function getContent(): string;
-
-    public function getLoggedTime(): int {
-        return $this->logged_at;
-    }
-}
-
-class Success extends AbstractResult {
+class Success implements Result {
     public function __construct(float $consumed_ms, int $sequence_no, int $logged_at) {
         $this->consumed_ms = $consumed_ms;
         $this->sequence_no = $sequence_no;
@@ -26,7 +15,7 @@ class Success extends AbstractResult {
     }
 }
 
-class Timeout extends AbstractResult {
+class Timeout implements Result {
     public function __construct(int $sequence_no, int $logged_at) {
         $this->sequence_no = $sequence_no;
         $this->logged_at   = $logged_at;
@@ -36,7 +25,7 @@ class Timeout extends AbstractResult {
     }
 }
 
-class Failure extends AbstractResult {
+class Failure implements Result {
     public function __construct(string $reason, int $logged_at) {
         $this->reason    = $reason;
         $this->logged_at = $logged_at;

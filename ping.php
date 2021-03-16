@@ -70,7 +70,9 @@ function parse(string $line): ?Result {
     return new Failure($line, $time);
 }
 
-function ping(string $host = 'chatwork.com') {
+// TODO 対象ホストを指定できるようにする
+function ping(string $host = 'google.com') {
+    // TODO popenをproc_openに変えてちゃんとプロセス終了する
     $command = "/sbin/ping {$host} --apple-time 2>&1";
 
     $handle = popen($command, 'r');
@@ -81,7 +83,7 @@ function ping(string $host = 'chatwork.com') {
         # Server-Sent Events
         header("Content-Type: text/event-stream\n\n");
 
-        while (!feof($handle)) {
+        while (!feof($handle) && !connection_aborted()) {
             $line = fgets($handle);
             #echo ">>> $line";
             $result = parse($line);
@@ -89,6 +91,7 @@ function ping(string $host = 'chatwork.com') {
                 continue;
             }
             echo "data: {$result->toEvent()}";
+            error_log($result->toEvent());
             echo "\n\n";
             flush();
         }
@@ -119,35 +122,17 @@ config = {
 
     // The data for our dataset
     data: {
-    labels: [
-            new Date(1234567890),
-            new Date(1234567891),
-            new Date(1234567892),
-            new Date(1234567893),
-            new Date(1234567894),
-            new Date(1234567895),
-            new Date(1234567896),
-            new Date(1234567897),
-            new Date(1234567898),
-            new Date(1234567899),
-        ], // 日付が自動で増えていくようにしたい
+        labels: [],
         datasets: [{
             label: 'ping RTT',
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             //data: [0, 10, 5, 2, 20, 30, 45]
-            data: [
-                100,
-                110,
-                120,
-                125,
-                110,
-                130,
-                130,
-                "",
-                90,
-            ]
+            data: []
         }]
+        // TODO 塗り潰しをやめる
+        // TODO デフォルトの高さ、幅を設定する
+        // TODO ヌルッとした線のつながりをやめる
     },
 
     // Configuration options go here
@@ -168,6 +153,11 @@ var pinger = new EventSource('ping.php?sse=1');
 
 pinger.onmessage = function(e) {
     console.log(e.data);
+    var payload = JSON.parse(e.data);
+    window.config.data.labels.push(payload.time); // TODO ラベル名
+    window.config.data.datasets[0].data.push(payload.rtt);
+    // TODO 全体の長さを一定に保つ
+    window.chart.update();
 }
 
 pinger.onerror = function(e) {

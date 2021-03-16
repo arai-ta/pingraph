@@ -89,26 +89,59 @@ if ($_POST) {
 <body>
 <h1>pingraph</h1>
 <canvas id="graph"></canvas>
+<button id="button">btn</button>
 <script type="text/javascript">
-var ctx = document.getElementById('graph').getContext('2d');
-var chart = new Chart(ctx, {
+config = {
     // The type of chart we want to create
     type: 'line',
 
     // The data for our dataset
     data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: [
+            new Date(1234567890),
+            new Date(1234567891),
+            new Date(1234567892),
+            new Date(1234567893),
+            new Date(1234567894),
+            new Date(1234567895),
+            new Date(1234567896),
+            new Date(1234567897),
+            new Date(1234567898),
+            new Date(1234567899),
+        ], // 日付が自動で増えていくようにしたい
         datasets: [{
-            label: 'My First dataset',
+            label: 'ping RTT',
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
-            data: [0, 10, 5, 2, 20, 30, 45]
+            //data: [0, 10, 5, 2, 20, 30, 45]
+            data: [
+                100,
+                110,
+                120,
+                125,
+                110,
+                130,
+                130,
+                "",
+                90,
+            ]
         }]
     },
 
     // Configuration options go here
     options: {}
-});
+};
+ctx = document.getElementById('graph').getContext('2d');
+chart = new Chart(ctx, config);
+
+i = 100;
+
+document.getElementById('button').onclick = function() {
+    window.config.data.labels.push("aaa");
+    window.config.data.datasets[0].data.push(i+=10);
+    window.chart.update();
+};
+
 </script>
 </body>
 </html>

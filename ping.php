@@ -116,19 +116,22 @@ if (filter_input(INPUT_GET, 'sse') == 1) {
 <canvas id="graph"></canvas>
 <button id="button">btn</button>
 <script type="text/javascript">
+
+const X_LENGTH = 50;
+
 config = {
     // The type of chart we want to create
     type: 'line',
 
     // The data for our dataset
     data: {
-        labels: [],
+        labels: new Array(X_LENGTH),
         datasets: [{
             label: 'ping RTT',
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             //data: [0, 10, 5, 2, 20, 30, 45]
-            data: []
+            data: new Array(X_LENGTH)
         }]
         // TODO 塗り潰しをやめる
         // TODO デフォルトの高さ、幅を設定する
@@ -156,7 +159,12 @@ pinger.onmessage = function(e) {
     var payload = JSON.parse(e.data);
     window.config.data.labels.push(payload.time); // TODO ラベル名
     window.config.data.datasets[0].data.push(payload.rtt);
-    // TODO 全体の長さを一定に保つ
+
+    if (window.config.data.labels.length > X_LENGTH) {
+        window.config.data.labels.shift();
+        window.config.data.datasets[0].data.shift();
+    }
+
     window.chart.update();
 }
 

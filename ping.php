@@ -128,12 +128,9 @@ config = {
         labels: new Array(X_LENGTH),
         datasets: [{
             label: 'ping RTT',
-            backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
-            //data: [0, 10, 5, 2, 20, 30, 45]
             data: new Array(X_LENGTH)
         }]
-        // TODO 塗り潰しをやめる
         // TODO デフォルトの高さ、幅を設定する
         // TODO ヌルッとした線のつながりをやめる
     },

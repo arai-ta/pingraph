@@ -48,6 +48,7 @@ class Failure implements Result {
 }
 
 function parse(string $line): ?Result {
+    # TODO サマリー表示はnullにする
     # PING chatwork.com (143.204.82.104): 56 data bytes
     if (preg_match('/PING.*bytes/', $line) === 1) {
         return null; // header
@@ -116,7 +117,7 @@ if (filter_input(INPUT_GET, 'sse') == 1) {
 <canvas id="graph"></canvas>
 <script type="text/javascript">
 
-const X_LENGTH = 50;
+const X_LENGTH = 100;
 
 config = {
     // The type of chart we want to create
@@ -130,11 +131,9 @@ config = {
             borderColor: 'rgb(255, 99, 132)',
             data: new Array(X_LENGTH)
         }]
-        // TODO デフォルトの高さ、幅を設定する
         // TODO ヌルッとした線のつながりをやめる
     },
 
-    // Configuration options go here
     options: {
         title: {
             text: 'ping RTT for google.com'
@@ -153,14 +152,10 @@ config = {
             }],
             yAxes: [{
                 ticks: {
-                    beginAtZero: true
+                    suggestedMax: 120,  // 120ms
+                    stepSize: 10,       //  10ms step
+                    suggestedMin: 0,    //   0ms
                 },
-                    /*
-                scaleLabel: {
-                    display: true,
-                    labelString: 'value'
-                }
-                     */
             }]
         },
     }
@@ -190,5 +185,7 @@ pinger.onerror = function(e) {
 }
 
 </script>
+<!-- TODO: start, stop ボタンを作る -->
+<!-- TODO: エラーなど表示するエリアを作る -->
 </body>
 </html>

@@ -73,19 +73,20 @@ function parse(string $line): ?Result {
 
 // TODO 対象ホストを指定できるようにする
 function ping(string $host = 'google.com') {
-    // TODO popenをproc_openに変えてちゃんとプロセス終了する
     $command = "/sbin/ping {$host} --apple-time 2>&1";
 
-    $handle = popen($command, 'r');
+    $process = proc_open($command, [ 1 => ["pipe", "w"]], $pipes);
 
-    if (!$handle) {
+    if ($handle === false) {
         die("failed to start $command");
     } else try {
         # Server-Sent Events
         header("Content-Type: text/event-stream\n\n");
 
-        while (!feof($handle) && !connection_aborted()) {
-            $line = fgets($handle);
+        while (!feof($pipes[1]) && !connection_aborted()) {
+            // TODO connection_status() とか ignore_user_abort(false) とか
+            // プロセスが終了しないので制御がどこに行ってるか調べる
+            $line = fgets($pipes[1]);
             #echo ">>> $line";
             $result = parse($line);
             if (is_null($result)) {
@@ -94,10 +95,17 @@ function ping(string $host = 'google.com') {
             echo "data: {$result->toEvent()}";
             error_log($result->toEvent());
             echo "\n\n";
+            ob_flush();
             flush();
         }
     } finally {
-        pclose($handle);
+        fclose($pipes[1]);
+        proc_terminate($process);
+        while (proc_get_status($process)['running']) {
+            sleep(1);
+        }
+        $exit_code = proc_close($process);
+        error_log("ping exit with $exit_code");
         exit;
     }
 }

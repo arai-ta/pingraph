@@ -114,7 +114,6 @@ if (filter_input(INPUT_GET, 'sse') == 1) {
 <body>
 <h1>pingraph</h1>
 <canvas id="graph"></canvas>
-<button id="button">btn</button>
 <script type="text/javascript">
 
 const X_LENGTH = 50;
@@ -136,25 +135,45 @@ config = {
     },
 
     // Configuration options go here
-    options: {}
+    options: {
+        title: {
+            text: 'ping RTT for google.com'
+        },
+        scales: {
+            xAxes: [{
+                // type: 'time',
+                /* time: {
+                    tooltipFormat: 'll HH:mm'
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Date'
+                }
+                 */
+            }],
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                },
+                    /*
+                scaleLabel: {
+                    display: true,
+                    labelString: 'value'
+                }
+                     */
+            }]
+        },
+    }
 };
 ctx = document.getElementById('graph').getContext('2d');
 chart = new Chart(ctx, config);
-
-i = 100;
-
-document.getElementById('button').onclick = function() {
-    window.config.data.labels.push("aaa");
-    window.config.data.datasets[0].data.push(i+=10);
-    window.chart.update();
-};
 
 var pinger = new EventSource('ping.php?sse=1');
 
 pinger.onmessage = function(e) {
     console.log(e.data);
     var payload = JSON.parse(e.data);
-    window.config.data.labels.push(payload.time); // TODO ラベル名
+    window.config.data.labels.push(new Date(payload.time * 1000));
     window.config.data.datasets[0].data.push(payload.rtt);
 
     if (window.config.data.labels.length > X_LENGTH) {
@@ -166,7 +185,7 @@ pinger.onmessage = function(e) {
 }
 
 pinger.onerror = function(e) {
-    alert("error!");
+    // alert("error!");
     console.error(e);
 }
 

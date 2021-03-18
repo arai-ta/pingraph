@@ -122,7 +122,7 @@ if (filter_input(INPUT_GET, 'sse') == 1) {
 </head>
 <body>
 <h1>pingraph</h1>
-<canvas id="graph"></canvas>
+<div style="align-items: center"><canvas id="graph" style="width:90%"></canvas></div>
 <script type="text/javascript">
 
 const X_LENGTH = 100;

@@ -147,6 +147,7 @@ config = {
             text: 'ping RTT for google.com'
         },
         scales: {
+            // TODO X軸の時刻ラベル表示をちゃんとする
             xAxes: [{
                 // type: 'time',
                 /* time: {

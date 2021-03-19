@@ -19,4 +19,4 @@ $ make open
 
 ## ライセンス
 
-[MIT](https://opensource.org/licenses/MIT)
+[MIT](./LICENSE)

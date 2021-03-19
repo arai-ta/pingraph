@@ -185,7 +185,9 @@ pinger.onmessage = function(e) {
         window.config.data.datasets[0].data.shift();
     }
 
-    window.chart.update();
+    if (document.getElementById('autoupdate').checked) {
+        window.chart.update();
+    }
 }
 
 pinger.onerror = function(e) {
@@ -194,6 +196,7 @@ pinger.onerror = function(e) {
 }
 
 </script>
+<label><input type="checkbox" id="autoupdate" checked="checked">auto update</label>
 <!-- TODO: start, stop ボタンを作る -->
 <!-- TODO: エラーなど表示するエリアを作る -->
 </body>
